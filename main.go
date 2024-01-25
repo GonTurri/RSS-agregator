@@ -47,10 +47,16 @@ func main() {
 		MaxAge:           300,
 	}))
 	v1Router := chi.NewRouter()
+
+	//GET
 	v1Router.Get("/healthz", handlerReadiness)
 	v1Router.Get("/err", handlerErr)
+	v1Router.Get("/users", apCfg.middlewareAuth(apCfg.getUserHnadler))
+
+	//POST
 
 	v1Router.Post("/users", apCfg.createUserHandler)
+	v1Router.Post("/feeds", apCfg.middlewareAuth(apCfg.createFeedHandler))
 
 	router.Mount("/v1", v1Router)
 

@@ -18,6 +18,10 @@ func handlerErr(w http.ResponseWriter, r *http.Request) {
 	respondWithError(w, http.StatusInternalServerError, "Internal Server Error")
 }
 
+func (apiCfg *apiConfig) getUserHnadler(w http.ResponseWriter, r *http.Request, user database.User) {
+	respondWithJSON(w, http.StatusOK, dbUserToUser(user))
+}
+
 func (apiCfg *apiConfig) createUserHandler(w http.ResponseWriter, r *http.Request) {
 	type params struct {
 		Name string
@@ -42,5 +46,38 @@ func (apiCfg *apiConfig) createUserHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	respondWithJSON(w, http.StatusOK, dbUserToUser(user))
+	respondWithJSON(w, http.StatusCreated, dbUserToUser(user))
+}
+
+func (cfg *apiConfig) createFeedHandler(w http.ResponseWriter, r *http.Request, user database.User) {
+	type parameters struct {
+		Name string
+		Url  string
+	}
+
+	decoder := json.NewDecoder(r.Body)
+	params := parameters{}
+	err := decoder.Decode(&params)
+
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, fmt.Sprintf("error parsing json: %v", err))
+		return
+	}
+
+	feed, err := cfg.DB.CreateFeed(r.Context(), database.CreateFeedParams{
+		ID:        uuid.New(),
+		CreatedAt: time.Now().UTC(),
+		UpdatedAt: time.Now().UTC(),
+		Name:      params.Name,
+		Url:       params.Url,
+		UserID:    user.ID,
+	})
+
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, fmt.Sprintf("error creating feed: %v", err))
+		return
+	}
+
+	respondWithJSON(w, http.StatusCreated, dbFeedToFeed(feed))
+
 }
