@@ -52,6 +52,7 @@ func main() {
 	v1Router.Get("/healthz", handlerReadiness)
 	v1Router.Get("/err", handlerErr)
 	v1Router.Get("/users", apCfg.middlewareAuth(apCfg.getUserHnadler))
+	v1Router.Get("/feeds", apCfg.getFeedsHandler)
 
 	//POST
 

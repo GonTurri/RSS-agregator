@@ -22,6 +22,20 @@ func (apiCfg *apiConfig) getUserHnadler(w http.ResponseWriter, r *http.Request, 
 	respondWithJSON(w, http.StatusOK, dbUserToUser(user))
 }
 
+func (cfg *apiConfig) getFeedsHandler(w http.ResponseWriter, r *http.Request) {
+	feeds, err := cfg.DB.GetAllFeeds(r.Context())
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+	}
+	newFeeds := make([]Feed, 0)
+	for _, f := range feeds {
+		newFeeds = append(newFeeds, dbFeedToFeed(f))
+	}
+
+	respondWithJSON(w, http.StatusOK, newFeeds)
+
+}
+
 func (apiCfg *apiConfig) createUserHandler(w http.ResponseWriter, r *http.Request) {
 	type params struct {
 		Name string
