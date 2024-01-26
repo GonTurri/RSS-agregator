@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/GonTurri/RSS-agregator/internal/database"
 	"github.com/go-chi/chi"
@@ -36,6 +37,8 @@ func main() {
 	dbQueries := database.New(db)
 
 	apCfg := apiConfig{DB: dbQueries}
+
+	go startScraping(dbQueries, 10, time.Minute)
 
 	router := chi.NewRouter()
 	router.Use(cors.Handler(cors.Options{
